@@ -1,0 +1,30 @@
+{
+  "specVersion": "0.1",
+  "client": "Convenium (flagship demo) — THE MERIDIAN, fictional $12.5M penthouse, floor 60, anonymous city",
+  "name": "THE MERIDIAN",
+  "oneLiner": "Sixty floors above everything — one residence, a private elevator, and an infinity pool holding the skyline still.",
+  "audience": "real: prospects receiving Convenium outreach; fictional: UHNW buyer deciding in one visit",
+  "differentiator": "fictional property = zero usage restrictions, publishable, video generated ONCE and reskinned per pitch via skin.ts",
+  "mood": "a nocturne about altitude — weightless, expensive silence at dusk; editorial, never brochure",
+  "voice": {
+    "tone": "still, assured, second person; short declarative lines; the city is scenery, the silence is the product",
+    "vocabulary": ["above", "private", "skyline", "marble", "terrace", "stillness", "arrived"],
+    "neverSay": ["luxury lifestyle", "breathtaking", "one-of-a-kind opportunity", "dream home", "wow factor"]
+  },
+  "tokens": {
+    "bg": "#0A0D13",
+    "accent": "#D5BE86",
+    "accentWinter": "#D5BE86",
+    "text": "#F3F0E8",
+    "typeDisplay": "Italiana",
+    "typeBody": "Manrope",
+    "texture": "soft grain + slow drifting light shaft",
+    "accentRule": "single accent (no seasonal pair on this skin — ONE-accent law intact): HUD readouts, kickers, price, CTA only. Ink + champagne per pack prompt 06, trend-tuned like 003"
+  },
+  "identityAssets": {
+    "logo": null,
+    "photos": ["assets-in/ — 5 AI keyframes K0–K4 + 4 chained clips J1–J4 (lab/004-MERIDIAN-MEDIA-GUIDE.md); fictional, publishable, no licensing constraints"],
+    "referenceSites": ["https://sondaven.com/en (chapter walk, huge quiet type, hold-and-move gallery)"]
+  },
+  "upsellNotes": "This skin IS the outreach asset: per-prospect emails reskin name/copy/facts in skin.ts; clips reused. 004 is a SKIN of the 003 template — uniqueness law deliberately not applied between skins of the same template."
+}

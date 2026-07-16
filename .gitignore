@@ -1,0 +1,20 @@
+# Dependencies & build
+node_modules/
+dist/
+.astro/
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+*~
+
+# Temp / local scratch
+ingest-tmp/
+_token-raw/

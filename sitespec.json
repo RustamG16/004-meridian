@@ -1,0 +1,39 @@
+{
+  "specVersion": "0.1",
+  "buildId": "lab-004-meridian",
+  "archetype": "JOURNEY",
+  "grammar": "journey/TOUR — KEYFRAME CHAIN: 5 approved stills (K0–K4) bracket 4 clips; every clip generated with start_image=K(i-1) AND end_image=K(i), so seams are frame-locked by construction",
+  "brandspecRef": "brandspec.json",
+  "videoBackend": "seedance-2.0 via Higgsfield MCP (std, 1080p, 16:9, no audio, 8-10s)",
+  "shots": [
+    { "id": "J1", "name": "THE APPROACH", "seconds": 10, "chain": "K0 → K1", "takes": "up to 2" },
+    { "id": "J2", "name": "THE ARRIVAL", "seconds": 8, "chain": "K1 → K2", "takes": "1" },
+    { "id": "J3", "name": "THE FLOW", "seconds": 8, "chain": "K2 → K3", "takes": "1" },
+    { "id": "J4", "name": "THE TERRACE", "seconds": 10, "chain": "K3 → K4 (loop variant may echo K0)", "takes": "up to 2" }
+  ],
+  "keyframes": ["K0_hero.jpg (Gate-1 identity)", "K1_arrival.jpg", "K2_living.jpg", "K3_doors.jpg", "K4_terrace.jpg"],
+  "frameSpec": {
+    "hero": { "fps": 10, "width": 1440, "webpQuality": 55, "targetPayloadMB": [8, 15] },
+    "heroMobile": { "fps": 10, "width": 720, "webpQuality": 55, "targetPayloadMB": [3, 6], "clips": "J1+J4 only" },
+    "budgetDecision": "inherited from lab/003 finding: 36s @ spec's old 20fps default ≈ 40MB → busts budget. Desktop 10fps/1440/q55 = 360 frames ≈ 13-15MB (eager half ~7MB); mobile J1+J4 10fps/720 ≈ 190 frames ≈ 3.5MB. Placeholders: 200/100."
+  },
+  "scaffold": [
+    "PRELOADER (THE MERIDIAN)",
+    "JOURNEY 4-segment scrub: APPROACH hero statement → ARRIVAL → FLOW (pinned space cards) → TERRACE — floor-counter HUD (FLOOR 0→60 + space names) throughout",
+    "RESIDENCE FACTS strip (4 bed · 5.5 bath · 7,200 sq ft · floor 60 — count-up)",
+    "GALLERY (horizontal HOLD-AND-MOVE)",
+    "AMENITIES (reveal list)",
+    "PRICE ($12,500,000 statement)",
+    "CTA (Request a Private Showing: date + name + email · agent card Alexandra Cole)"
+  ],
+  "copySlots": {
+    "note": "all copy lives in site/src/content/skin.ts (TEMPLATE LAW). Per-pitch prospect reskins swap name/copy/facts there; clips are never regenerated."
+  },
+  "uniqueness": {
+    "note": "004 is the flagship SKIN of the 003 template — uniqueness law deliberately NOT applied between skins of the same template (that is the template's purpose). Skin-level differences: ink+champagne palette, EN copy, floor-counter HUD (vs altitude), amenities/price/agent modules (vs kitchen/seasons/hosts).",
+    "typePairing": "Italiana + Manrope (template default)",
+    "layoutMutations": ["amenities grid", "price statement section", "agent card beside form"],
+    "motionSignature": "floor-counter HUD (FLOOR 0→60 + space names)",
+    "texture": "soft grain + slow drifting light shaft (template default)"
+  }
+}

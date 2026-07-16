@@ -1,0 +1,216 @@
+---
+import Base from '../layouts/Base.astro';
+import { skin } from '../content/skin';
+
+const { hud, journey, facts, suites, sphere, water, amenities, price, agent, gallery, cta, meta } = skin;
+---
+
+<Base>
+  <!-- JOURNEY — 6-clip chained tour (sky → restaurant → lounge → suite → spa → lake), scrubbed as ONE unbroken glide. -->
+  <section
+    class="journey"
+    id="tour"
+    data-journey
+    data-frames={JSON.stringify(journey.frames)}
+    data-hud={JSON.stringify(hud.spaces)}
+    data-altitude={hud.altitude}
+    data-hud-prefix={hud.prefix}
+    data-hud-unit={hud.unit}
+    data-hud-locale={hud.locale}
+  >
+    <div class="journey__sticky">
+      <canvas data-journey-canvas></canvas>
+      <div class="journey__scrim" aria-hidden="true"></div>
+
+      {journey.chapters.map((ch, i) => (
+        <div class:list={['journey__chapter', `journey__chapter--${i % 2 ? 'right' : 'left'}`]} data-chapter id={ch.id}>
+          <p class="kicker">{ch.kicker}</p>
+          {i === 0
+            ? <h1 class="journey__display">{ch.title}</h1>
+            : <h2 class="journey__title">{ch.title}</h2>}
+          <p class="journey__body">{ch.body}</p>
+          {'rooms' in ch && ch.rooms && (
+            <div class="rooms">
+              {ch.rooms.map((r) => (
+                <article class="room">
+                  <div class="media media--room">
+                    <img data-media src={r.img} alt={r.name} loading="lazy" />
+                    <span class="media__label" aria-hidden="true">{r.name}</span>
+                  </div>
+                  <h3 class="room__name">{r.name}</h3>
+                  <p class="room__line">{r.line}</p>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div class="hud" data-hud-root aria-hidden="true">
+        <span class="hud__alt" data-hud-alt>{hud.prefix}0{hud.unit}</span>
+        <span class="hud__track"><i data-hud-fill></i></span>
+        <span class="hud__space" data-hud-space>{hud.spaces[0].label}</span>
+      </div>
+
+      <div class="journey__hint" data-scroll-hint aria-hidden="true">
+        <span></span>{journey.scrollHint}
+      </div>
+    </div>
+  </section>
+
+  <!-- RESIDENCE FACTS STRIP — counters animate up on scroll -->
+  <section class="facts" aria-label="Residence facts">
+    {facts.map((f) => (
+      <div class="fact" data-reveal>
+        <span
+          class="fact__value"
+          data-count={f.value}
+          data-format={f.format}
+          data-suffix={f.suffix}
+          data-decimals={f.decimals}
+        >0</span>
+        <span class="fact__label">{f.label}</span>
+      </div>
+    ))}
+  </section>
+
+  <!-- THE SUITES — asymmetric editorial spread -->
+  <section class="suites" id="suites">
+    <div class="suites__copy" data-reveal>
+      <p class="kicker">{suites.kicker}</p>
+      <h2 class="section-title">{suites.title}</h2>
+      <p class="section-body">{suites.body}</p>
+    </div>
+    <div class="suites__spread">
+      <figure class="suites__fig suites__fig--large" data-reveal>
+        <div class="media suites__media" style={`aspect-ratio: ${suites.images[0].ratio}`}>
+          <img data-media data-parallax="0.12" src={suites.images[0].src} alt={suites.images[0].alt} loading="lazy" />
+        </div>
+        <figcaption class="suites__cap">{suites.images[0].caption}</figcaption>
+      </figure>
+      <figure class="suites__fig suites__fig--small" data-reveal>
+        <div class="media suites__media" style={`aspect-ratio: ${suites.images[1].ratio}`}>
+          <img data-media data-parallax="0.18" src={suites.images[1].src} alt={suites.images[1].alt} loading="lazy" />
+        </div>
+        <figcaption class="suites__cap">{suites.images[1].caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- GALLERY — HOLD AND MOVE -->
+  <section class="gallery" id="gallery" data-strip>
+    <p class="kicker gallery__kicker">{gallery.kicker}</p>
+    <div class="gallery__track" data-strip-track>
+      {gallery.images.map((g, i) => (
+        <figure class="gallery__item">
+          <div class="media gallery__media">
+            <img data-media src={g.src} alt={g.alt} loading="lazy" draggable="false" />
+            <span class="media__label" aria-hidden="true">{g.alt}</span>
+          </div>
+          <figcaption class="gallery__cap">
+            <span class="gallery__cap-index">{String(i + 1).padStart(2, '0')}</span>
+            {g.alt}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+    <div class="gallery__hint" data-strip-hint aria-hidden="true">{gallery.hint}</div>
+  </section>
+
+  <!-- THE SPHERE — full-bleed statement -->
+  <section class="sphere" id="sphere" data-sphere>
+    <div class="sphere__pin">
+      <div class="sphere__media">
+        <img data-media data-parallax="0.08" data-parallax-scale src={sphere.img} alt={sphere.imgAlt} loading="lazy" />
+      </div>
+      <div class="sphere__scrim" aria-hidden="true"></div>
+      <div class="sphere__copy" data-reveal>
+        <p class="kicker">{sphere.kicker}</p>
+        <p class="sphere__line">{sphere.line}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE WATER — wellness triptych -->
+  <section class="water" id="water">
+    <div class="water__head" data-reveal>
+      <p class="kicker">{water.kicker}</p>
+      <h2 class="section-title">{water.title}</h2>
+      <p class="section-body">{water.body}</p>
+    </div>
+    <div class="water__triptych">
+      {water.images.map((img, i) => (
+        <figure class="water__fig" data-reveal style={`transition-delay: ${0.08 + i * 0.1}s`}>
+          <div class="media water__media">
+            <img data-media src={img.src} alt={img.alt} loading="lazy" />
+          </div>
+          <figcaption class="water__cap">{img.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <!-- AMENITIES — reveal animations -->
+  <section class="amenities" id="amenities">
+    <p class="kicker" data-reveal>{amenities.kicker}</p>
+    <h2 class="section-title" data-reveal>{amenities.title}</h2>
+    <ul class="amenities__grid">
+      {amenities.items.map((item) => (
+        <li class="amenities__item" data-reveal>{item}</li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- PRICE — one statement -->
+  <section class="price" id="price">
+    <p class="kicker" data-reveal>{price.kicker}</p>
+    <p class="price__amount" data-reveal>{price.amount}</p>
+    <p class="price__line" data-reveal>{price.line}</p>
+  </section>
+
+  <!-- CTA — request a private showing + agent card -->
+  <section class="inquiry" id="enquire">
+    <p class="kicker" data-reveal>{cta.kicker}</p>
+    <h2 class="inquiry__title" data-reveal>{cta.title}</h2>
+    <p class="section-body inquiry__sub" data-reveal>{cta.sub}</p>
+    <p class="inquiry__price" data-reveal>{cta.priceLine}</p>
+    <div class="inquiry__grid" data-reveal>
+      <form class="inquiry__form" data-inquiry novalidate>
+        <div class="inquiry__row">
+          <label class="field">
+            <span>{cta.fields.date}</span>
+            <input type="date" name="date" required />
+          </label>
+          <label class="field field--wide">
+            <span>{cta.fields.name}</span>
+            <input type="text" name="name" required autocomplete="name" />
+          </label>
+        </div>
+        <label class="field field--full">
+          <span>{cta.fields.email}</span>
+          <input type="email" name="email" required autocomplete="email" />
+        </label>
+        <button class="btn" type="submit">{cta.submit}</button>
+        <p class="inquiry__toast" data-toast role="status" aria-live="polite" hidden>{cta.toast}</p>
+      </form>
+      <aside class:list={['agent', { 'agent--typo': !agent.showPortrait }]}>
+        {agent.showPortrait && (
+          <div class="media media--agent">
+            <img data-media src={agent.img} alt={agent.imgAlt} loading="lazy" />
+          </div>
+        )}
+        <p class="agent__kicker kicker">{agent.kicker}</p>
+        <div class="agent__rule" aria-hidden="true"></div>
+        <h3 class="agent__name">{agent.name}</h3>
+        <p class="agent__role">{agent.role}</p>
+        {agent.lines.map((line) => <p class="agent__line">{line}</p>)}
+        <p class="agent__contact">
+          <a href={meta.telHref}>{meta.tel}</a><br />
+          <a href={`mailto:${meta.email}`}>{meta.email}</a>
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <script src="../scripts/journey.js"></script>
+</Base>
