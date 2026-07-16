@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import { skin } from '../content/skin';
+
+const { suitesPage: page, meta } = skin;
+---
+
+<Base title={page.title} description={page.description}>
+  <!-- SUITES SHOWCASE — editorial, type-led. Index interaction: hover a name → stage image swaps. -->
+  <header class="sp-hero">
+    <p class="kicker" data-reveal>{page.kicker}</p>
+    <h1 class="sp-hero__title" data-reveal>{page.titleLine}</h1>
+    <p class="section-body sp-hero__intro" data-reveal>{page.intro}</p>
+  </header>
+
+  <section class="sp-index" aria-label="Suite index" data-sp-index>
+    <div class="sp-index__list">
+      <p class="sp-index__hint" aria-hidden="true">{page.indexHint}</p>
+      {page.suites.map((s, i) => (
+        <a class="sp-index__item" href={`#${s.id}`} data-sp-item={i}>
+          <span class="sp-index__no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="sp-index__name">{s.name}</span>
+          <span class="sp-index__rate">{s.rate}</span>
+        </a>
+      ))}
+    </div>
+    <div class="sp-index__stage" aria-hidden="true">
+      {page.suites.map((s, i) => (
+        <div class:list={['media', 'sp-index__img', { 'is-active': i === 0 }]} data-sp-img={i}>
+          <img data-media src={s.hero.src} alt="" loading={i === 0 ? 'eager' : 'lazy'} />
+          <span class="media__label">{s.name}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {page.suites.map((s, i) => (
+    <article class="sp-suite" id={s.id} aria-label={s.name}>
+      <div class="sp-suite__head" data-reveal>
+        <p class="kicker">{String(i + 1).padStart(2, '0')} · {page.kicker}</p>
+        <h2 class="sp-suite__name">{s.name}</h2>
+        <p class="sp-suite__line">{s.line}</p>
+      </div>
+
+      <figure class="sp-suite__hero" data-reveal>
+        <div class="media sp-suite__hero-media">
+          <img data-media data-parallax="0.1" src={s.hero.src} alt={s.hero.alt} loading="lazy" />
+          <span class="media__label" aria-hidden="true">{s.name}</span>
+        </div>
+      </figure>
+
+      <div class="sp-suite__meta" data-reveal>
+        <dl class="sp-suite__facts">
+          <div><dt>Area</dt><dd>{s.facts.area}</dd></div>
+          <div><dt>Occupancy</dt><dd>{s.facts.sleeps}</dd></div>
+          <div><dt>View</dt><dd>{s.facts.view}</dd></div>
+          <div><dt>Rate</dt><dd>{s.rate}</dd></div>
+        </dl>
+        <a class="sp-suite__cta" href={`/?suite=${encodeURIComponent(s.name)}#enquire`}>
+          {page.enquireLabel} →
+        </a>
+      </div>
+
+      <div class="sp-suite__details">
+        {s.details.map((d) => (
+          <figure class="sp-suite__detail" data-reveal>
+            <div class="media sp-suite__detail-media">
+              <img data-media src={d.src} alt={d.alt} loading="lazy" />
+              <span class="media__label" aria-hidden="true">{d.label}</span>
+            </div>
+            <figcaption class="sp-suite__cap">{d.label}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </article>
+  ))}
+
+  <section class="sp-close" data-reveal>
+    <p class="kicker">{skin.rate.kicker}</p>
+    <p class="sp-close__line">{skin.rate.line}</p>
+    <a class="sp-close__cta btn" href="/#enquire">{skin.nav.cta}</a>
+  </section>
+
+  <script>
+    // Index hover → stage swap (pointer affordance only; anchors keep keyboard/touch path).
+    const items = document.querySelectorAll('[data-sp-item]');
+    const imgs = document.querySelectorAll('[data-sp-img]');
+    items.forEach((item) => {
+      const activate = () => {
+        imgs.forEach((im) => im.classList.toggle('is-active', im.dataset.spImg === item.dataset.spItem));
+      };
+      item.addEventListener('mouseenter', activate);
+      item.addEventListener('focus', activate);
+    });
+  </script>
+</Base>

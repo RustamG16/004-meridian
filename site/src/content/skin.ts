@@ -42,7 +42,7 @@ export const skin = {
     links: [
       { label: 'Home', href: '#top' },
       { label: 'The Tour', href: '#tour' },
-      { label: 'Suites', href: '#suites' },
+      { label: 'Suites', href: '/suites' },
       { label: 'Gallery', href: '#gallery' },
       { label: 'Amenities', href: '#amenities' },
       { label: 'Stay', href: '#enquire' },
@@ -158,6 +158,8 @@ export const skin = {
     kicker: 'THE SUITES',
     title: 'A bed beneath a circle of sky.',
     body: 'Glass on three sides, mountains on all of them. Forty-two suites — each one held above the water.',
+    linkLabel: 'All suites',
+    linkHref: '/suites',
     images: [
       {
         src: '/media/suites/presidential.jpg',
@@ -170,6 +172,58 @@ export const skin = {
         alt: 'Circular master suite lakeside',
         caption: 'Master Suite · Circle skylight',
         ratio: '3 / 4',
+      },
+    ],
+  },
+
+  // /suites showcase page — categories along the story (what the property SELLS), not the media pile.
+  // Missing images stay placeholders (ui.js is-missing panel) + a generation prompt in generation-sheet.md.
+  suitesPage: {
+    title: 'The Suites — THE MERIDIAN · Alpine Lakeside Resort',
+    description:
+      'Three ways to sleep on the lake: the Lake Suite with glass on three sides, the Circle Suite beneath a skylight of sky, and the Presidential Suite with a private terrace above the water. From €1,850.',
+    kicker: 'THE SUITES',
+    titleLine: 'Three ways to sleep on the lake.',
+    intro:
+      'Forty-two suites, three characters. Every one of them holds the water in view; the difference is what the room does with the sky.',
+    indexHint: 'SELECT A SUITE',
+    enquireLabel: 'Enquire about this suite',
+    suites: [
+      {
+        id: 'lake',
+        name: 'Lake Suite',
+        line: 'Glass on three sides — the lake decides the wallpaper.',
+        facts: { area: '64 M²', sleeps: 'Sleeps 2', view: 'Lake, full width' },
+        rate: 'From €1,850',
+        hero: { src: '/media/suites/lake-hero.jpg', alt: 'Lake Suite — glass on three sides over the water' },
+        details: [
+          { src: '/media/suites/lake-window.jpg', alt: 'Lake Suite window seat at dusk', label: 'The window seat' },
+          { src: '/media/suites/lake-bath.jpg', alt: 'Lake Suite bathroom with lake view', label: 'The bath' },
+        ],
+      },
+      {
+        id: 'circle',
+        name: 'Circle Suite',
+        line: 'A bed beneath a circle of sky.',
+        facts: { area: '78 M²', sleeps: 'Sleeps 2', view: 'Sky + mountains' },
+        rate: 'From €2,300',
+        hero: { src: '/media/suites/circular.jpg', alt: 'Circle Suite — circular master suite on the lakeside' },
+        details: [
+          { src: '/media/spaces/suite.jpg', alt: 'Circle Suite bed beneath the skylight', label: 'The skylight' },
+          { src: '/media/gallery/suite.jpg', alt: 'Circle Suite interior at evening', label: 'The evening' },
+        ],
+      },
+      {
+        id: 'presidential',
+        name: 'Presidential Suite',
+        line: 'A private terrace above the water. The lake keeps the noise.',
+        facts: { area: '142 M²', sleeps: 'Sleeps 4', view: 'Lake + private terrace' },
+        rate: 'From €4,600',
+        hero: { src: '/media/suites/presidential.jpg', alt: 'Presidential Suite with lake view' },
+        details: [
+          { src: '/media/suites/presidential-terrace.jpg', alt: 'Presidential Suite private terrace above the water', label: 'The terrace' },
+          { src: '/media/suites/presidential-living.jpg', alt: 'Presidential Suite living room', label: 'The living room' },
+        ],
       },
     ],
   },

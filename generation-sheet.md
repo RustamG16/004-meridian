@@ -42,3 +42,22 @@ continuous move, one short bridging clip is needed:
 - Camera: one continuous slow push-in and slight lower-drop toward the roast — a dolly-in,
   NO cut, NO dissolve, no speed ramps. Same warm kitchen light, same steam.
 - Both endpoint extracts attached as start/end images → seam frame-locks by construction.
+
+## NEEDED — 2026-07-16 (/suites page image slots)
+
+All 1080p+ · 16:9 or 4:3 · same evening grade as the tour (spruce-ink dusk, champagne window
+light, one sky). Attach K0/an approved still as style reference. Drop into
+`site/public/media/suites/` with EXACTLY these names:
+
+1. **`lake-hero.jpg`** — Lake Suite hero. Corner suite with floor-to-ceiling glass on THREE
+   sides, low bed facing the water, alpine lake filling every pane, dusk. Camera inside,
+   wide, slightly low. No skylight (that's the Circle Suite's signature).
+2. **`lake-window.jpg`** — Lake Suite detail. A deep window seat with a wool throw, lake and
+   mountains beyond, last blue of the evening; candle or small lamp lit. 4:3 or 3:4.
+3. **`lake-bath.jpg`** — Lake Suite detail. Freestanding stone bath at the glass, water view,
+   steam, one towel; dark stone + warm light. 3:4.
+4. **`presidential-terrace.jpg`** — Presidential Suite detail. Private furnished terrace
+   cantilevered above the water, plunge-pool edge or rail, lake + mountains at dusk,
+   interior glow behind. Matches the existing `presidential.jpg` interior.
+5. **`presidential-living.jpg`** — Presidential Suite detail. Separate living room: linear
+   fireplace, deep sofas, lake glass, evening. Same materials as `presidential.jpg`.

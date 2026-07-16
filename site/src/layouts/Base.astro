@@ -4,6 +4,11 @@ import { skin } from '../content/skin';
 
 const { meta, fonts, tokens, preloader, nav, menu, footer } = skin;
 const cssVars = `:root{--bg:${tokens.bg};--text:${tokens.text};--dim:${tokens.dim};--accent-summer:${tokens.accent};--accent-winter:${tokens.accentWinter};--accent:${tokens.accent};--display:'${fonts.display}',serif;--body:'${fonts.body}',sans-serif;}`;
+
+// Per-page meta (index uses skin.meta defaults); anchors must resolve from any route.
+const { title = meta.title, description = meta.description } = Astro.props;
+const isHome = Astro.url.pathname === '/' || Astro.url.pathname === '/index.html';
+const pageHref = (h: string) => (h.startsWith('#') && !isHome ? `/${h}` : h);
 ---
 
 <!doctype html>
@@ -11,12 +16,12 @@ const cssVars = `:root{--bg:${tokens.bg};--text:${tokens.text};--dim:${tokens.di
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{meta.title}</title>
-    <meta name="description" content={meta.description} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
     {meta.noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content={tokens.bg} />
-    <meta property="og:title" content={meta.title} />
-    <meta property="og:description" content={meta.description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
     <meta property="og:image" content="/og.jpg" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -41,7 +46,7 @@ const cssVars = `:root{--bg:${tokens.bg};--text:${tokens.text};--dim:${tokens.di
         <span class="topbar__menu-icon" aria-hidden="true"></span>{nav.menuLabel}
       </button>
       <span class="topbar__mark">{meta.name}</span>
-      <a class="topbar__cta" href="#enquire">{nav.cta}</a>
+      <a class="topbar__cta" href={pageHref('#enquire')}>{nav.cta}</a>
     </header>
 
     <div class="menu" id="site-menu" data-menu-root role="dialog" aria-modal="true" aria-label="Site menu" hidden>
@@ -52,14 +57,14 @@ const cssVars = `:root{--bg:${tokens.bg};--text:${tokens.text};--dim:${tokens.di
         </button>
         <ul class="menu__links">
           {menu.links.map((l) => (
-            <li class="menu__item"><a class="menu__link" href={l.href} data-menu-link>{l.label}</a></li>
+            <li class="menu__item"><a class="menu__link" href={pageHref(l.href)} data-menu-link>{l.label}</a></li>
           ))}
         </ul>
         <p class="menu__group-label">{menu.groupLabel}</p>
         <ul class="menu__links menu__links--group">
           {menu.groupLinks.map((l) => (
             <li class="menu__item">
-              <a class="menu__link menu__link--sub" href="#tour" data-menu-link data-journey-progress={l.progress}>{l.label}</a>
+              <a class="menu__link menu__link--sub" href={pageHref('#tour')} data-menu-link data-journey-progress={l.progress}>{l.label}</a>
             </li>
           ))}
         </ul>

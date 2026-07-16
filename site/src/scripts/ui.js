@@ -18,6 +18,8 @@ if (pre) {
     const minBeat = new Promise((r) => setTimeout(r, 700));
     const firstFrame = new Promise((resolve) => {
       if (window.__meridianFirstFrame) return resolve();
+      // pages without a journey (e.g. /suites) have no first frame to wait for
+      if (!document.querySelector('[data-journey]')) return resolve();
       const onReady = () => resolve();
       addEventListener('meridian:first-frame', onReady, { once: true });
       setTimeout(resolve, 5000); // network safety — never hang the curtain forever

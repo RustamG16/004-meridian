@@ -55,9 +55,10 @@ if (root && opener) {
     a.addEventListener('click', (e) => {
       const p = parseFloat(a.dataset.journeyProgress);
       if (!Number.isNaN(p)) {
-        e.preventDefault();
         const journey = document.querySelector('[data-journey]');
+        // No journey on this page (multi-page skin): let the href navigate normally.
         if (journey) {
+          e.preventDefault();
           const top = journey.getBoundingClientRect().top + scrollY;
           const target = top + p * (journey.offsetHeight - innerHeight);
           window.__lenis ? window.__lenis.scrollTo(target) : scrollTo({ top: target, behavior: 'smooth' });

@@ -103,6 +103,7 @@ const frames = {
       <p class="kicker">{suites.kicker}</p>
       <h2 class="section-title">{suites.title}</h2>
       <p class="section-body">{suites.body}</p>
+      <a class="suites__link" href={suites.linkHref}>{suites.linkLabel} →</a>
     </div>
     <div class="suites__spread">
       <figure class="suites__fig suites__fig--large" data-reveal>
@@ -204,6 +205,10 @@ const frames = {
     <p class="section-body inquiry__sub" data-reveal>{cta.sub}</p>
     <div class="inquiry__grid" data-reveal>
       <form class="inquiry__form" data-inquiry novalidate>
+        <p class="inquiry__regarding" data-inquiry-regarding hidden>
+          Regarding: <span data-inquiry-suite></span>
+        </p>
+        <input type="hidden" name="suite" />
         <div class="inquiry__row">
           <label class="field">
             <span>{cta.fields.date}</span>
@@ -260,6 +265,18 @@ const frames = {
       addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
       addEventListener('resize', update);
       update();
+    }
+
+    // /suites → enquiry prefill: ?suite=<name>#enquire fills the hidden field + shows a chip.
+    const suiteName = new URLSearchParams(location.search).get('suite');
+    if (suiteName) {
+      const form = document.querySelector('[data-inquiry]');
+      const chip = document.querySelector('[data-inquiry-regarding]');
+      const label = document.querySelector('[data-inquiry-suite]');
+      const input = form?.querySelector('input[name="suite"]');
+      if (input) input.value = suiteName;
+      if (label) label.textContent = suiteName;
+      if (chip) chip.hidden = false;
     }
   </script>
 </Base>
