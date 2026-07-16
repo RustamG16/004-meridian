@@ -85,7 +85,6 @@ export const skin = {
       count: 452, // 1600px / 8fps / q62 re-extract (was 426 @1152/q45)
       mobilePath: '/frames/hero-mobile/frame_',
       mobileCount: 200,
-      eagerFraction: 0.55,
     },
     scrollHint: 'SCROLL',
     chapters: [

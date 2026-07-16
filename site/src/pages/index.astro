@@ -1,8 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
 import { skin } from '../content/skin';
+import { readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const { hud, journey, facts, suites, sphere, water, amenities, price, agent, gallery, cta, meta } = skin;
+
+// Frame counts come from the files actually on disk, not a hand-typed number —
+// a count/disk mismatch makes the scrubber request 404s and the hero appears frozen.
+const countFrames = (dir: string) => {
+  try {
+    return readdirSync(fileURLToPath(new URL(`../../public/frames/${dir}/`, import.meta.url)))
+      .filter((f) => /^frame_\d+\.webp$/.test(f)).length;
+  } catch {
+    return 0;
+  }
+};
+const frames = {
+  ...journey.frames,
+  count: countFrames('hero') || journey.frames.count,
+  mobileCount: countFrames('hero-mobile') || journey.frames.mobileCount,
+};
 ---
 
 <Base>
@@ -11,7 +29,7 @@ const { hud, journey, facts, suites, sphere, water, amenities, price, agent, gal
     class="journey"
     id="tour"
     data-journey
-    data-frames={JSON.stringify(journey.frames)}
+    data-frames={JSON.stringify(frames)}
     data-hud={JSON.stringify(hud.spaces)}
     data-altitude={hud.altitude}
     data-hud-prefix={hud.prefix}
