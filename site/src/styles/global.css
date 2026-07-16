@@ -61,6 +61,11 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 @keyframes pre-in { from { opacity: 0; letter-spacing: .7em; } to { opacity: 1; letter-spacing: .5em; } }
 .preloader.is-done { opacity: 0; pointer-events: none; }
+.preloader__pct {
+  position: absolute; bottom: 8vh;
+  font-size: 11px; letter-spacing: .34em; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ============ TOPBAR — omai trigger row: MENU · wordmark · ENQUIRE ============ */
 .topbar {
@@ -338,10 +343,11 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .water__head { max-width: 42ch; flex: none; }
 .water__track {
   display: flex; align-items: flex-end; gap: 3vw; width: max-content;
+  padding-right: 10vw; /* travel room so the drive survives ultrawide clamps */
   will-change: transform;
 }
-.water__panel { width: clamp(360px, 54vw, 880px); flex: none; }
-.water__panel:nth-child(2) { width: clamp(300px, 40vw, 640px); padding-bottom: 6vh; }
+.water__panel { width: clamp(360px, 54vw, 1100px); flex: none; }
+.water__panel:nth-child(2) { width: clamp(300px, 40vw, 800px); padding-bottom: 6vh; }
 .water__media { aspect-ratio: 16 / 10; }
 .water__panel:nth-child(2) .water__media { aspect-ratio: 4 / 5; }
 .water__cap {

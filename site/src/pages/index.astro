@@ -267,6 +267,20 @@ const frames = {
       update();
     }
 
+    // Preloader %: real coarse-spine (every 4th frame) load progress, not a timer.
+    const pct = document.querySelector('[data-preload-pct]');
+    if (pct && !reduced) {
+      const timer = setInterval(() => {
+        const s = window.__scrubber;
+        const pre = document.querySelector('[data-preloader]');
+        if (!pre || pre.classList.contains('is-done')) { clearInterval(timer); return; }
+        if (!s) return;
+        let spine = 0, done = 0;
+        for (let i = 0; i < s.count; i += 4) { spine++; if (s.loaded.has(i)) done++; }
+        pct.textContent = `${Math.min(100, Math.round((done / spine) * 100))} %`;
+      }, 120);
+    }
+
     // /suites → enquiry prefill: ?suite=<name>#enquire fills the hidden field + shows a chip.
     const suiteName = new URLSearchParams(location.search).get('suite');
     if (suiteName) {

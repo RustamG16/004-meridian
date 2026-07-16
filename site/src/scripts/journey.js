@@ -35,7 +35,7 @@ if (reduced) {
 
 function init() {
   const scrubber = new FlipbookScrubber(canvas, cfg);
-  window.__scrubber = scrubber; // debug/verification handle (menu deep-link QA)
+  window.__scrubber = scrubber; // public handle: preloader progress readout + QA
   // Gate the preloader on first decoded frame (not a blind timer) — empty canvas = "frozen" hero.
   scrubber.ready.then(() => {
     window.__meridianFirstFrame = true;
