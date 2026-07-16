@@ -22,6 +22,18 @@ export class DragStrip {
     el.addEventListener('wheel', (e) => this.wheel(e), { passive: false });
     addEventListener('resize', () => this.clampTarget());
 
+    // Keyboard access — drag-only was pointer-exclusive (a11y). Labels stay in markup (skin-agnostic).
+    if (!el.hasAttribute('tabindex')) el.tabIndex = 0;
+    el.addEventListener('keydown', (e) => {
+      const step = Math.round(this.el.clientWidth * 0.6);
+      const jump = { ArrowRight: step, ArrowLeft: -step, End: this.max(), Home: -this.max() }[e.key];
+      if (jump === undefined) return;
+      e.preventDefault();
+      this.tx = e.key === 'End' ? this.max() : e.key === 'Home' ? 0 : this.tx + jump;
+      this.clampTarget();
+      this.firstTouch();
+    });
+
     const loop = () => {
       this.x += (this.tx - this.x) * 0.12;
       if (Math.abs(this.tx - this.x) < 0.1) this.x = this.tx;
