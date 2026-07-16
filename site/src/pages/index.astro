@@ -4,7 +4,7 @@ import { skin } from '../content/skin';
 import { readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const { hud, journey, facts, rooms, suitesPage, location, sphere, water, amenities, rate, agent, gallery, cta, meta } = skin;
+const { journey, manifesto, factsBar, rooms, suitesPage, dining, amenities, about, rate, agent, cta, meta } = skin;
 
 // Frame counts come from the files actually on disk, not a hand-typed number —
 // a count/disk mismatch makes the scrubber request 404s and the hero appears frozen.
@@ -18,83 +18,46 @@ const countFrames = (dir: string) => {
 };
 const frames = {
   ...journey.frames,
-  count: countFrames('hero') || journey.frames.count,
-  mobileCount: countFrames('hero-mobile') || journey.frames.mobileCount,
+  count: countFrames('v1') || journey.frames.count,
 };
 ---
 
 <Base>
-  <!-- JOURNEY — 6-clip chained tour (sky → restaurant → lounge → suite → spa → lake), scrubbed as ONE unbroken glide. -->
-  <section
-    class="journey"
-    id="tour"
-    data-journey
-    data-frames={JSON.stringify(frames)}
-    data-hud={JSON.stringify(hud.spaces)}
-    data-altitude={hud.altitude}
-    data-hud-prefix={hud.prefix}
-    data-hud-unit={hud.unit}
-    data-hud-locale={hud.locale}
-  >
+  <!-- JOURNEY — continuous scroll-scrub (Video 1 drone descent). -->
+  <section class="journey" id="tour" data-journey data-frames={JSON.stringify(frames)}>
     <div class="journey__sticky">
       <canvas data-journey-canvas></canvas>
       <div class="journey__scrim" aria-hidden="true"></div>
-
-      {journey.chapters.map((ch, i) => (
-        <div class:list={['journey__chapter', `journey__chapter--${i % 2 ? 'right' : 'left'}`]} data-chapter id={ch.id}>
-          <p class="kicker">{ch.kicker}</p>
-          {i === 0
-            ? <h1 class="journey__display">{ch.title}</h1>
-            : <h2 class="journey__title">{ch.title}</h2>}
-          <p class="journey__body">{ch.body}</p>
-          {'rooms' in ch && ch.rooms && (
-            <div class="rooms">
-              {ch.rooms.map((r) => (
-                <article class="room">
-                  <div class="media media--room">
-                    <img data-media src={r.img} alt={r.name} loading="lazy" />
-                    <span class="media__label" aria-hidden="true">{r.name}</span>
-                  </div>
-                  <h3 class="room__name">{r.name}</h3>
-                  <p class="room__line">{r.line}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-
-      <div class="hud" data-hud-root aria-hidden="true">
-        <span class="hud__alt" data-hud-alt>{hud.prefix}0{hud.unit}</span>
-        <span class="hud__track"><i data-hud-fill></i></span>
-        <span class="hud__space" data-hud-space>{hud.spaces[0].label}</span>
-      </div>
-
-      <div class="journey__hint" data-scroll-hint aria-hidden="true">
-        <span></span>{journey.scrollHint}
-      </div>
     </div>
   </section>
 
-  <!-- THE NUMBERS — one cinematic statement: oversized Fraunces numerals as index rows -->
-  <section class="numbers" aria-label="The resort in numbers">
-    <p class="kicker numbers__kicker" data-reveal>{facts.kicker}</p>
-    {facts.items.map((f, i) => (
-      <div class="numbers__row" data-reveal>
-        <span class="numbers__index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-        <span
-          class="numbers__value"
-          data-count={f.value}
-          data-format={f.format}
-          data-suffix={f.suffix}
-          data-decimals={f.decimals}
-        >0</span>
-        <span class="numbers__meta">
-          <span class="numbers__label">{f.label}</span>
-          <span class="numbers__line">{f.line}</span>
-        </span>
-      </div>
-    ))}
+  <!-- MANIFESTO — display statement, no image -->
+  <section class="manifesto" aria-label="Manifesto">
+    <p class="kicker manifesto__kicker" data-reveal>{manifesto.kicker}</p>
+    <div class="manifesto__lines" data-reveal>
+      {manifesto.lines.map((line) => (
+        <p class="manifesto__line">{line}</p>
+      ))}
+    </div>
+    <hr class="manifesto__rule" aria-hidden="true" data-reveal />
+  </section>
+
+  <!-- QUICK FACTS — compact inline count-up row -->
+  <section class="facts-bar" aria-label="The resort in numbers">
+    <div class="facts-bar__row">
+      {factsBar.items.map((f) => (
+        <div class="facts-bar__item" data-reveal>
+          <span
+            class="facts-bar__value"
+            data-count={f.value}
+            data-format={'format' in f ? f.format : undefined}
+            data-suffix={'suffix' in f ? f.suffix : undefined}
+            data-decimals={'decimals' in f ? f.decimals : undefined}
+          >0</span>
+          <span class="facts-bar__label">{f.label}</span>
+        </div>
+      ))}
+    </div>
   </section>
 
   <!-- THE ROOMS — pinned horizontal carousel (lasala d-carousel-rooms), cards from suitesPage -->
@@ -125,98 +88,63 @@ const frames = {
     </div>
   </section>
 
-  <!-- GALLERY — HOLD AND MOVE -->
-  <section class="gallery" id="gallery" data-strip role="region" aria-label="Gallery — arrow keys scroll">
-    <p class="kicker gallery__kicker">{gallery.kicker}</p>
-    <div class="gallery__track" data-strip-track>
-      {gallery.images.map((g, i) => (
-        <figure class="gallery__item">
-          <div class="media gallery__media">
-            <img data-media src={g.src} alt={g.alt} loading="lazy" draggable="false" />
-            <span class="media__label" aria-hidden="true">{g.alt}</span>
-          </div>
-          <figcaption class="gallery__cap">
-            <span class="gallery__cap-index">{String(i + 1).padStart(2, '0')}</span>
-            {g.alt}
-          </figcaption>
-        </figure>
+  <!-- DINING — 40/60 editorial teaser -->
+  <section class="dining" aria-label="Dining">
+    <div class="dining__copy" data-reveal>
+      <p class="kicker">{dining.kicker}</p>
+      <h2 class="section-title">{dining.title}</h2>
+      <p class="section-body">{dining.body}</p>
+      <p class="dining__signature">{dining.signature}</p>
+      <a class="dining__link" href={dining.linkHref}>{dining.linkLabel} →</a>
+    </div>
+    <div class="dining__media">
+      <img data-media src={dining.img} alt={dining.imgAlt} loading="lazy" />
+    </div>
+  </section>
+
+  <!-- AMENITIES — wave marquee (rAF drift + sine Y; static scroll-snap fallback) -->
+  <section class="amenities-wave" id="amenities" data-amenities-wave aria-label="Amenities">
+    <div class="amenities-wave__head" data-reveal>
+      <p class="kicker">{amenities.kicker}</p>
+      <h2 class="section-title">{amenities.title}</h2>
+    </div>
+    <div class="amenities-wave__band" data-amenities-band>
+      <div class="amenities-wave__track" data-amenities-track>
+        {[0, 1].map((copy) =>
+          amenities.items.map((item, i) => (
+            <a
+              class="am-card"
+              href={`/amenities/${item.slug}`}
+              data-am-card
+              data-am-phase={i}
+              aria-label={`${item.label} — Explore`}
+              tabindex={copy === 0 ? 0 : -1}
+            >
+              <div class="media am-card__media">
+                <img data-media src={item.img} alt="" loading="lazy" />
+              </div>
+              <span class="am-card__no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="am-card__name">{item.label}</h3>
+              <p class="am-card__line">{item.line}</p>
+              <span class="am-card__cta" aria-hidden="true">Explore →</span>
+            </a>
+          ))
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT / STORY — quiet two-column -->
+  <section class="about" aria-label="About">
+    <div class="about__copy" data-reveal>
+      <p class="kicker">{about.kicker}</p>
+      <h2 class="section-title">{about.title}</h2>
+      {about.paragraphs.map((p) => (
+        <p class="section-body about__p">{p}</p>
       ))}
     </div>
-    <div class="gallery__hint" data-strip-hint aria-hidden="true">{gallery.hint}</div>
-  </section>
-
-  <!-- THE SPHERE — full-bleed statement -->
-  <section class="sphere" id="sphere" data-sphere>
-    <div class="sphere__pin">
-      <div class="sphere__media">
-        <img data-media data-parallax="0.08" data-parallax-scale src={sphere.img} alt={sphere.imgAlt} loading="lazy" />
-      </div>
-      <div class="sphere__scrim" aria-hidden="true"></div>
-      <div class="sphere__copy" data-reveal>
-        <p class="kicker">{sphere.kicker}</p>
-        <p class="sphere__line">{sphere.line}</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- THE WATER — scroll-driven horizontal panel (sticky pin, real movement, no editing grammar) -->
-  <section class="water" id="water" data-hscroll>
-    <div class="water__pin">
-      <div class="water__head" data-reveal>
-        <p class="kicker">{water.kicker}</p>
-        <h2 class="section-title">{water.title}</h2>
-        <p class="section-body">{water.body}</p>
-      </div>
-      <div class="water__track" data-hscroll-track>
-        {water.images.map((img) => (
-          <figure class="water__panel">
-            <div class="media water__media">
-              <img data-media src={img.src} alt={img.alt} loading="lazy" />
-              <span class="media__label" aria-hidden="true">{img.caption}</span>
-            </div>
-            <figcaption class="water__cap">{img.caption}</figcaption>
-          </figure>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- AMENITIES — typographic index: numbered display rows, hover media preview -->
-  <section class="amenities" id="amenities">
-    <p class="kicker" data-reveal>{amenities.kicker}</p>
-    <h2 class="section-title" data-reveal>{amenities.title}</h2>
-    <ul class="am-index" data-am-index>
-      {amenities.items.map((item, i) => (
-        <li class="am-index__item" data-reveal>
-          <span class="am-index__no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-          <span class="am-index__label">{item.label}</span>
-          {'img' in item && item.img && (
-            <span class="am-index__preview" aria-hidden="true">
-              <img src={item.img} alt="" loading="lazy" />
-            </span>
-          )}
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  <!-- THE SETTING — location beat (lasala d-location): full-bleed aerial + small-caps meta -->
-  <section class="setting" id="setting">
-    <div class="setting__media">
-      <img data-media data-parallax="0.08" src={location.img} alt={location.imgAlt} loading="lazy" />
-      <div class="setting__scrim" aria-hidden="true"></div>
-    </div>
-    <div class="setting__copy" data-reveal>
-      <p class="kicker">{location.kicker}</p>
-      <h2 class="setting__title">{location.title}</h2>
-      <dl class="setting__meta">
-        {location.items.map((it) => (
-          <div class="setting__item">
-            <dt>{it.label}</dt>
-            <dd>{it.value}</dd>
-          </div>
-        ))}
-      </dl>
+    <div class="about__media media" data-reveal>
+      <img data-media src={about.img} alt={about.imgAlt} loading="lazy" />
     </div>
   </section>
 
@@ -230,9 +158,10 @@ const frames = {
     <div class="inquiry__grid" data-reveal>
       <form class="inquiry__form" data-inquiry novalidate>
         <p class="inquiry__regarding" data-inquiry-regarding hidden>
-          Regarding: <span data-inquiry-suite></span>
+          Regarding: <span data-inquiry-regarding-label></span>
         </p>
         <input type="hidden" name="suite" />
+        <input type="hidden" name="amenity" />
         <div class="inquiry__row">
           <label class="field">
             <span>{cta.fields.date}</span>
@@ -271,7 +200,7 @@ const frames = {
 
   <script src="../scripts/journey.js"></script>
   <script>
-    // Scroll-driven horizontal panels (ROOMS + WATER) — property-level; engine stays fork-free.
+    // Scroll-driven horizontal panels (ROOMS) — property-level; engine stays fork-free.
     // The pin is CSS sticky; this only maps each section's progress -> track translateX.
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const panels = [...document.querySelectorAll('[data-hscroll]')].map((section) => ({
@@ -310,15 +239,24 @@ const frames = {
       }, 120);
     }
 
-    // /suites → enquiry prefill: ?suite=<name>#enquire fills the hidden field + shows a chip.
-    const suiteName = new URLSearchParams(location.search).get('suite');
-    if (suiteName) {
+    // Enquiry prefill: ?suite= or ?amenity= fills hidden field + shows a chip.
+    const params = new URLSearchParams(location.search);
+    const suiteName = params.get('suite');
+    const amenityName = params.get('amenity');
+    const regarding = suiteName || amenityName;
+    if (regarding) {
       const form = document.querySelector('[data-inquiry]');
       const chip = document.querySelector('[data-inquiry-regarding]');
-      const label = document.querySelector('[data-inquiry-suite]');
-      const input = form?.querySelector('input[name="suite"]');
-      if (input) input.value = suiteName;
-      if (label) label.textContent = suiteName;
+      const label = document.querySelector('[data-inquiry-regarding-label]');
+      if (suiteName) {
+        const input = form?.querySelector('input[name="suite"]');
+        if (input) input.value = suiteName;
+      }
+      if (amenityName) {
+        const input = form?.querySelector('input[name="amenity"]');
+        if (input) input.value = amenityName;
+      }
+      if (label) label.textContent = regarding;
       if (chip) chip.hidden = false;
     }
   </script>

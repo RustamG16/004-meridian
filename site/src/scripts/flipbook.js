@@ -128,24 +128,41 @@ export class FlipbookScrubber {
     this.ctx.imageSmoothingEnabled = true;
     this.ctx.imageSmoothingQuality = 'high';
   }
-  draw(i) {
+  _cover(img) {
+    const cw = this.canvas.width, ch = this.canvas.height;
+    const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    this.ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+  }
+  draw(i, frac = 0) {
     const j = this.nearestLoaded(i);
     if (j < 0) return;
     this.current = i;
     const img = this.images[j];
     if (!img || !img.naturalWidth) return;
-    const cw = this.canvas.width, ch = this.canvas.height;
-    const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    const w = img.naturalWidth * s, h = img.naturalHeight * s;
     this.ctx.fillStyle = '#091D1E';
-    this.ctx.fillRect(0, 0, cw, ch);
-    this.ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this._cover(img);
+    // sub-frame cross-blend: kills the whole-frame stepping that reads as a rough scrub.
+    // Only when the exact base frame AND its neighbor are decoded — nearestLoaded fallbacks never blend.
+    if (frac > 0.01 && j === i && this.loaded.has(i + 1)) {
+      const next = this.images[i + 1];
+      if (next && next.naturalWidth) {
+        this.ctx.globalAlpha = frac;
+        this._cover(next);
+        this.ctx.globalAlpha = 1;
+      }
+    }
   }
   setProgress(p) {
-    const i = Math.max(0, Math.min(this.count - 1, Math.round(p * (this.count - 1))));
-    if (i === this.current) return;
-    this.prioritize(i);
-    this.draw(i);
+    const f = Math.max(0, Math.min(this.count - 1, p * (this.count - 1)));
+    // roundFrames: land on nearest frame (hero hops) so stop equality holds;
+    // default floor + sub-frame blend for continuous scrub elsewhere.
+    const i = this.cfg.roundFrames ? Math.round(f) : Math.floor(f);
+    if (i !== this.current) this.prioritize(i);
+    if (this._lastF !== undefined && Math.abs(f - this._lastF) < 0.015) return;
+    this._lastF = f;
+    this.draw(i, this.cfg.roundFrames ? 0 : f - i);
   }
 }
 

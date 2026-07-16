@@ -32,7 +32,8 @@ if (root && opener) {
     document.body.classList.remove('menu-open');
     const done = () => { root.hidden = true; };
     reduced ? done() : setTimeout(done, 450);
-    window.__lenis?.start();
+    // Don't unlock the hero hard-step lock if journey is holding lenis stopped
+    window.__journey?.onMenuClose?.() ?? window.__lenis?.start();
     lastFocus?.focus();
   };
 
@@ -59,9 +60,13 @@ if (root && opener) {
         // No journey on this page (multi-page skin): let the href navigate normally.
         if (journey) {
           e.preventDefault();
-          const top = journey.getBoundingClientRect().top + scrollY;
-          const target = top + p * (journey.offsetHeight - innerHeight);
-          window.__lenis ? window.__lenis.scrollTo(target) : scrollTo({ top: target, behavior: 'smooth' });
+          if (window.__journey?.goToProgress) {
+            window.__journey.goToProgress(p);
+          } else {
+            const top = journey.getBoundingClientRect().top + scrollY;
+            const target = top + p * (journey.offsetHeight - innerHeight);
+            window.__lenis ? window.__lenis.scrollTo(target) : scrollTo({ top: target, behavior: 'smooth' });
+          }
         }
       }
       close();
