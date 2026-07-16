@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
-"""Re-extract Meridian journey frames at demo quality.
+"""Extract + assemble the Meridian journey frames. NO CROSSFADES (law: one-continuous-video).
 
 Chain (PSNR-proven order from LOG 2026-07-16):
-  descent → restaurant → dining → resort-glide → suite-spa → sphere/aerial
+  descent -> restaurant -> dining -> resort-glide -> suite-spa -> sphere/aerial
 
-Desktop: 8 fps / 1600px / WebP q62  (was 1152/q45 — soft on retina)
-Mobile:  clips 1+6 @ 10 fps / 720 / q60
-Joins:   6-frame motion crossfade (lab/002 pattern)
+Desktop: 8 fps / 1920px (native source width) / WebP q75
+Mobile:  FULL tour / 8 fps / 720px / q60  (was clips 1+6 with a 10-frame dissolve — law violation
+         + broken story: HUD said RESTAURANT/SPA while showing sky)
+
+Joins:   hard, frame-locked. Per join we search the last SEARCH x first SEARCH frames for the
+         best-matching pair (min RMSE, grayscale 320px) and trim both sides to that pair.
+         If the best pair is still above BRIDGE_RMSE, we synthesize BRIDGE_N REAL in-between
+         frames with ffmpeg minterpolate (optical flow — motion, never opacity).
 Trim:    suite-spa head -0.6s, tail -0.9s
 Delogo:  cross 2-box over animated sparkle watermark @ ~1740,900 (1080p)
 """
@@ -18,6 +23,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 from PIL import Image
 
 HERE = Path(__file__).resolve().parent
@@ -33,7 +39,7 @@ FFMPEG = os.environ.get(
     r"\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.2-full_build\bin\ffmpeg.exe",
 )
 
-# Proven chain order (filenames ≠ contract names)
+# Proven chain order (filenames != contract names)
 CLIPS = [
     ("c1", "Drone_POV_forward_descent_1080p_202607160056.mp4", 0.0, None),
     ("c2", "Drone_POV_through_restaurant_1080p_202607152008.mp4", 0.0, None),
@@ -46,64 +52,130 @@ CLIPS = [
 # Cross-shaped delogo covering the sparkle watermark (1080p; measured ~1633,888 + LOG ~1740,900)
 DELOGO = "delogo=x=1600:y=860:w=280:h=80:show=0,delogo=x=1680:y=820:w=80:h=180:show=0"
 
-DESKTOP_W = 1600
-DESKTOP_FPS = 8
-DESKTOP_Q = 62
+FPS = 8
+DESKTOP_W = 1920
+DESKTOP_Q = 75
 MOBILE_W = 720
-MOBILE_FPS = 10
 MOBILE_Q = 60
-XFADE = 6
+SEARCH = 8              # pair-search window on each side of a join
+BRIDGE_RMSE = 30.0      # above this, the hard join pops -> synthesize optical-flow in-betweens
+BRIDGE_MAX_RMSE = 55.0  # above this, optical flow produces mush (verified on join 2) ->
+                        # hard join + the seam needs a real bridging CLIP (generation-sheet)
+BRIDGE_N = 4            # real in-between frames per bridged join
 
 
 def run(cmd: list[str]) -> None:
-    print("+", " ".join(cmd[-8:]))
-    subprocess.run(cmd, check=True)
+    print("+", " ".join(str(c) for c in cmd[-8:]))
+    subprocess.run([str(c) for c in cmd], check=True, capture_output=True)
 
 
-def extract(clip_id: str, src: Path, ss: float, to: float | None, width: int, fps: int, outdir: Path) -> list[Path]:
+def extract(clip_id: str, src: Path, ss: float, to: float | None, width: int, q: int, outdir: Path) -> list[Path]:
+    if os.environ.get("REUSE") == "1" and outdir.exists():
+        cached = sorted(outdir.glob("f*.webp"))
+        if cached:
+            return cached
     outdir.mkdir(parents=True, exist_ok=True)
     for old in outdir.glob("*.webp"):
         old.unlink()
-    vf = f"{DELOGO},fps={fps},scale={width}:-2:flags=lanczos"
+    vf = f"{DELOGO},fps={FPS},scale={width}:-2:flags=lanczos"
     pattern = str(outdir / "f%04d.webp")
     cmd = [FFMPEG, "-y"]
     if ss > 0:
         cmd += ["-ss", str(ss)]
     cmd += ["-i", str(src)]
     if to is not None:
-        # duration after -ss
         cmd += ["-t", str(max(0.1, to - ss))]
-    cmd += ["-vf", vf, "-c:v", "libwebp", "-quality", str(DESKTOP_Q if width >= 1000 else MOBILE_Q), "-compression_level", "4", pattern]
+    cmd += ["-vf", vf, "-c:v", "libwebp", "-quality", str(q), "-compression_level", "4", pattern]
     run(cmd)
     return sorted(outdir.glob("f*.webp"))
 
 
-def blend_save(a: Image.Image, b: Image.Image, t: float, path: Path, q: int) -> None:
-    img = Image.blend(a.convert("RGB"), b.convert("RGB"), t)
-    img.save(path, quality=q, method=4)
+def gray(path: Path, w: int = 320) -> np.ndarray:
+    img = Image.open(path).convert("L")
+    h = round(img.height * w / img.width)
+    return np.asarray(img.resize((w, h), Image.Resampling.BILINEAR), dtype=np.float64)
 
 
-def assemble(clip_frames: list[list[Path]], outdir: Path, q: int, xfade: int) -> int:
+def rmse(a: np.ndarray, b: np.ndarray) -> float:
+    return float(np.sqrt(np.mean((a - b) ** 2)))
+
+
+def best_pair(prev: list[Path], nxt: list[Path]) -> tuple[int, int, float]:
+    """Return (index into prev, index into nxt, rmse) for the best-matching join pair."""
+    pa = [gray(p) for p in prev[-SEARCH:]]
+    pb = [gray(p) for p in nxt[:SEARCH]]
+    best = (len(prev) - 1, 0, float("inf"))
+    for i, a in enumerate(pa):
+        for j, b in enumerate(pb):
+            d = rmse(a, b)
+            if d < best[2]:
+                best = (len(prev) - SEARCH + i, j, d)
+    return best
+
+
+def bridge(prev: list[Path], nxt: list[Path], ai: int, bi: int,
+           tag: str, outdir: Path, width: int, q: int) -> list[Path]:
+    """Synthesize BRIDGE_N REAL in-between frames (optical flow), never an opacity blend.
+
+    minterpolate needs motion context: we feed a 6-frame mini-clip (3 tail frames of the
+    previous clip + 3 head frames of the next) at the tour fps, interpolate (BRIDGE_N+1)x,
+    and keep only the synthesized frames strictly between the join pair A|B."""
+    CTX = 3
+    ins = prev[max(0, ai - CTX + 1):ai + 1] + nxt[bi:bi + CTX]
+    a_pos = len(prev[max(0, ai - CTX + 1):ai + 1]) - 1  # index of A within the mini-clip
+    work = outdir / "_bridge"
+    if work.exists():
+        shutil.rmtree(work)
+    work.mkdir(parents=True)
+    for k, p in enumerate(ins):
+        Image.open(p).convert("RGB").save(work / f"p{k:02d}.png")
+    factor = BRIDGE_N + 1
+    run([FFMPEG, "-y", "-framerate", str(FPS), "-i", str(work / "p%02d.png"),
+         "-vf", f"minterpolate=fps={FPS * factor}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1",
+         "-start_number", "0", str(work / "o%03d.png")])
+    outs = sorted(work.glob("o*.png"))
+    lo = a_pos * factor + 1  # first synthesized frame after A
+    picks = outs[lo:lo + BRIDGE_N]
+    frames = []
+    for k, p in enumerate(picks):
+        img = Image.open(p).convert("RGB")
+        if img.width != width:
+            img = img.resize((width, round(img.height * width / img.width)), Image.Resampling.LANCZOS)
+        dest = outdir / f"bridge_{tag}_{k}.webp"
+        img.save(dest, quality=q, method=4)
+        frames.append(dest)
+    return frames
+
+
+def assemble(clip_frames: list[list[Path]], joins: list[tuple[int, int, float]],
+             outdir: Path, width: int, q: int, make_bridges: bool) -> tuple[int, list[str]]:
     if outdir.exists():
         shutil.rmtree(outdir)
     outdir.mkdir(parents=True)
-    n = 0
-    prev_last: Image.Image | None = None
+    report: list[str] = []
+    seq: list[Path] = []
     for ci, frames in enumerate(clip_frames):
-        for fi, path in enumerate(frames):
-            n += 1
-            img = Image.open(path).convert("RGB")
-            dest = outdir / f"frame_{n:04d}.webp"
-            if prev_last is not None and fi < xfade:
-                a = prev_last.resize(img.size, Image.Resampling.LANCZOS)
-                t = (fi + 1) / (xfade + 1)
-                blend_save(a, img, t, dest, q)
+        start = 0 if ci == 0 else joins[ci - 1][1]
+        end = len(frames) - 1 if ci == len(clip_frames) - 1 else joins[ci][0]
+        part = frames[start:end + 1]
+        if ci > 0:
+            ai, bi, d = joins[ci - 1]
+            if d > BRIDGE_MAX_RMSE:
+                report.append(f"join {ci}: pair ({ai},{bi}) rmse {d:.1f} -> hard join, SOURCE DISAGREEMENT (needs bridging clip)")
+            elif d > BRIDGE_RMSE and make_bridges:
+                tag = f"{clip_frames[ci][0].parent.name}"
+                br = bridge(clip_frames[ci - 1], clip_frames[ci], ai, bi, tag, TMP, width, q)
+                seq.extend(br)
+                report.append(f"join {ci}: pair ({ai},{bi}) rmse {d:.1f} -> BRIDGED ({len(br)} flow frames)")
             else:
-                img.save(dest, quality=q, method=4)
-        prev_last = Image.open(frames[-1]).convert("RGB")
-    # poster
-    Image.open(clip_frames[0][0]).convert("RGB").save(outdir / "poster.webp", quality=80, method=4)
-    return n
+                report.append(f"join {ci}: pair ({ai},{bi}) rmse {d:.1f} -> hard join")
+        seq.extend(part)
+    n = 0
+    for p in seq:
+        n += 1
+        shutil.copyfile(p, outdir / f"frame_{n:04d}.webp")
+    Image.open(seq[0]).convert("RGB").save(outdir / "poster.webp", quality=80, method=4)
+    return n, report
 
 
 def main() -> int:
@@ -111,36 +183,35 @@ def main() -> int:
         print("ffmpeg not found:", FFMPEG, file=sys.stderr)
         return 1
 
-    if TMP.exists():
-        shutil.rmtree(TMP)
-    TMP.mkdir()
-
-    desktop_clips: list[list[Path]] = []
+    desktop: list[list[Path]] = []
+    mobile: list[list[Path]] = []
     for cid, name, ss, to in CLIPS:
         src = VIDEOS / name
         if not src.exists():
             print("missing", src, file=sys.stderr)
             return 1
-        frames = extract(cid, src, ss, to, DESKTOP_W, DESKTOP_FPS, TMP / cid)
-        print(f"  {cid}: {len(frames)} frames from {name}")
-        desktop_clips.append(frames)
+        d = extract(cid, src, ss, to, DESKTOP_W, DESKTOP_Q, TMP / cid)
+        m = extract(cid + "m", src, ss, to, MOBILE_W, MOBILE_Q, TMP / (cid + "m"))
+        print(f"  {cid}: {len(d)} desktop / {len(m)} mobile frames from {name}")
+        desktop.append(d)
+        mobile.append(m)
 
-    n = assemble(desktop_clips, OUT, DESKTOP_Q, XFADE)
+    # Join pairs are computed ONCE on desktop frames; the same fps means the same
+    # indices apply to mobile, keeping the two tours frame-aligned.
+    joins = [best_pair(desktop[i], desktop[i + 1]) for i in range(len(desktop) - 1)]
+
+    n, report = assemble(desktop, joins, OUT, DESKTOP_W, DESKTOP_Q, make_bridges=True)
+    for line in report:
+        print("  desktop", line)
     print(f"desktop frames: {n}")
 
-    # mobile = c1 + c6 only
-    mobile_clips: list[list[Path]] = []
-    for cid, name, ss, to in (CLIPS[0], CLIPS[-1]):
-        frames = extract(cid + "m", VIDEOS / name, ss, to, MOBILE_W, MOBILE_FPS, TMP / (cid + "m"))
-        print(f"  mobile {cid}: {len(frames)} frames")
-        mobile_clips.append(frames)
-    m = assemble(mobile_clips, OUTM, MOBILE_Q, 10)
+    m, mreport = assemble(mobile, joins, OUTM, MOBILE_W, MOBILE_Q, make_bridges=True)
     print(f"mobile frames: {m}")
 
-    # payload report
     total = sum(p.stat().st_size for p in OUT.glob("frame_*.webp"))
-    print(f"desktop payload: {total / 1e6:.1f} MB")
-    print("UPDATE skin.ts counts ->", n, "/", m)
+    totalm = sum(p.stat().st_size for p in OUTM.glob("frame_*.webp"))
+    print(f"desktop payload: {total / 1e6:.1f} MB   mobile payload: {totalm / 1e6:.1f} MB")
+    print("skin.ts fallback counts ->", n, "/", m, "(index.astro reads the real counts from disk)")
     return 0
 
 

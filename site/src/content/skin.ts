@@ -82,9 +82,9 @@ export const skin = {
       path: '/frames/hero/frame_',
       ext: '.webp',
       pad: 4,
-      count: 452, // 1600px / 8fps / q62 re-extract (was 426 @1152/q45)
+      count: 452, // fallback only — index.astro counts the files on disk. 1920px / 8fps / q75, frame-locked joins (no dissolves)
       mobilePath: '/frames/hero-mobile/frame_',
-      mobileCount: 200,
+      mobileCount: 452, // full tour on mobile too (720px/q60) — was clips 1+6 with a dissolve join
     },
     scrollHint: 'SCROLL',
     chapters: [

@@ -24,3 +24,21 @@ Optional extras (used if present): `still_living.jpg · still_kitchen.jpg · sti
 still_agent.jpg` (space cards + agent portrait; otherwise frames from clips are used).
 
 → then run **lab/004-INGEST-PROMPT.md** in a fresh context window.
+
+## NEEDED — 2026-07-16 (join 2 bridging clip)
+
+**Problem:** the restaurant→dining seam (delivered clips `Drone_POV_through_restaurant_…` →
+`Drone_POV_through_dining_room_…`) has no matching frame pair — full 20×20 RMSE matrix is flat
+at 57–66 (a scale/framing disagreement: restaurant clip ends tracking TOWARD the buffet wide,
+dining clip starts CLOSE-IN on the roast, lower camera). Optical-flow in-betweens produce
+visible mush (verified). Currently shipped as a hard frame-locked cut. To make this seam a true
+continuous move, one short bridging clip is needed:
+
+**`J2b_BuffetApproach.mp4` — 4–6 s, 1080p, 16:9, no audio.**
+- `start_image` = LAST frame of the restaurant clip (wide buffet view from the entrance side,
+  candlelit, steam rising; extract: `ingest-tmp/c2/f0073.webp`).
+- `end_image` = FIRST frame of the dining clip (close on the roast board, peppers right,
+  fruit bowls behind; extract: `ingest-tmp/c3/f0001.webp`).
+- Camera: one continuous slow push-in and slight lower-drop toward the roast — a dolly-in,
+  NO cut, NO dissolve, no speed ramps. Same warm kitchen light, same steam.
+- Both endpoint extracts attached as start/end images → seam frame-locks by construction.

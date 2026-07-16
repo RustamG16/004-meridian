@@ -474,7 +474,11 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   .journey__hint span { animation: none; }
   .journey { height: auto; }
   .journey--static .journey__sticky { position: static; height: auto; overflow: visible; }
-  .journey--static [data-journey-canvas] { position: relative; height: 60vh; }
+  .journey--static [data-journey-canvas] {
+    position: relative; height: 60vh;
+    /* reduced motion: the scrubber never draws — show the poster instead of a dead canvas */
+    background: url('/frames/hero/poster.webp') center / cover no-repeat;
+  }
   .journey--static .journey__chapter {
     position: static; opacity: 1 !important; transform: none !important; pointer-events: auto !important;
     padding: 8vh 7vw; justify-content: flex-start;
