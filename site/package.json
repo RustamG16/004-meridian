@@ -6,10 +6,13 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "audit:frames": "node scripts/audit-frames.mjs",
+    "export:frames": "node scripts/export-frames.mjs"
   },
   "dependencies": {
     "astro": "^4.16.18",
-    "lenis": "^1.1.14"
+    "lenis": "^1.1.14",
+    "sharp": "^0.35.3"
   }
 }

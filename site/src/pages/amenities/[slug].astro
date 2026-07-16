@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import { skin } from '../../content/skin';
+
+export function getStaticPaths() {
+  return skin.amenityPages.map((page) => ({
+    params: { slug: page.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+const pages = skin.amenityPages;
+const idx = pages.findIndex((p) => p.slug === page.slug);
+const prev = pages[(idx - 1 + pages.length) % pages.length];
+const next = pages[(idx + 1) % pages.length];
+---
+
+<Base title={`${page.name} — ${skin.meta.name}`} description={page.statement}>
+  <header class="ap-hero">
+    <div class="ap-hero__media" aria-hidden="true">
+      <img data-media src={page.hero.img} alt="" loading="eager" />
+    </div>
+    <div class="ap-hero__scrim" aria-hidden="true"></div>
+    <div class="ap-hero__copy" data-reveal>
+      <p class="kicker">{page.kicker}</p>
+      <h1 class="ap-hero__name">{page.name}</h1>
+    </div>
+  </header>
+
+  <section class="ap-statement" aria-label="Statement">
+    <p class="ap-statement__line" data-reveal>{page.statement}</p>
+  </section>
+
+  <section class="ap-editorial" aria-label="About">
+    <div class="ap-editorial__body" data-reveal>
+      {page.body.map((p) => <p>{p}</p>)}
+    </div>
+    {page.editorial.map((fig) => (
+      <figure class="ap-editorial__fig" data-reveal>
+        <div class="media ap-editorial__media">
+          <img data-media src={fig.img} alt={fig.alt} loading="lazy" />
+          <span class="media__label" aria-hidden="true">{fig.label}</span>
+        </div>
+        <figcaption class="ap-editorial__cap">{fig.label}</figcaption>
+      </figure>
+    ))}
+  </section>
+
+  <section class="ap-details" aria-label="Details">
+    <div class="ap-details__col" data-reveal>
+      <p class="ap-details__label">Facts</p>
+      <dl class="ap-details__dl">
+        {page.facts.map((f) => (
+          <div>
+            <dt>{f.label}</dt>
+            <dd>{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <div class="ap-details__col" data-reveal>
+      <p class="ap-details__label">Hours &amp; pricing</p>
+      <p class="ap-details__hours">{page.hours}</p>
+      <dl class="ap-details__dl">
+        {page.pricing.map((p) => (
+          <div>
+            <dt>{p.label}</dt>
+            <dd>{p.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <div class="ap-details__col" data-reveal>
+      <p class="ap-details__label">Services</p>
+      <ul class="ap-details__list">
+        {page.services.map((s) => <li>{s}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="ap-cta" data-reveal>
+    <a class="btn" href={page.cta.href}>{page.cta.label} →</a>
+  </section>
+
+  <nav class="ap-nav" aria-label="More amenities">
+    <a class="ap-nav__prev" href={`/amenities/${prev.slug}`}>
+      Previous
+      <span class="ap-nav__name">{prev.name}</span>
+    </a>
+    <a class="ap-nav__next" href={`/amenities/${next.slug}`}>
+      Next
+      <span class="ap-nav__name">{next.name}</span>
+    </a>
+  </nav>
+</Base>

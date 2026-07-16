@@ -1,0 +1,50 @@
+[
+  {
+    "clip": "Drone_POV_forward_descent_1080p_202607160056.mp4",
+    "id": "c1-descent",
+    "label": "descent",
+    "startIdx": 0,
+    "endIdx": 59,
+    "count": 60
+  },
+  {
+    "clip": "Drone_POV_through_restaurant_1080p_202607152008.mp4",
+    "id": "c2-restaurant",
+    "label": "restaurant",
+    "startIdx": 60,
+    "endIdx": 119,
+    "count": 60
+  },
+  {
+    "clip": "Drone_POV_through_dining_room_202607160224.mp4",
+    "id": "c3-dining",
+    "label": "dining",
+    "startIdx": 120,
+    "endIdx": 167,
+    "count": 48
+  },
+  {
+    "clip": "Camera_glide_through_resort_1080p_202607160229.mp4",
+    "id": "c4-lounge",
+    "label": "lounge",
+    "startIdx": 168,
+    "endIdx": 227,
+    "count": 60
+  },
+  {
+    "clip": "Camera_glides_through_suite_spa_202607160248.mp4",
+    "id": "c5-suite-spa",
+    "label": "suite-spa",
+    "startIdx": 228,
+    "endIdx": 287,
+    "count": 60
+  },
+  {
+    "clip": "Camera_moves_through_glass_sphere_202607160316.mp4",
+    "id": "c6-sphere",
+    "label": "sphere",
+    "startIdx": 288,
+    "endIdx": 347,
+    "count": 60
+  }
+]
