@@ -4,7 +4,7 @@ import { skin } from '../content/skin';
 import { readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const { hud, journey, facts, suites, sphere, water, amenities, rate, agent, gallery, cta, meta } = skin;
+const { hud, journey, facts, rooms, suitesPage, location, sphere, water, amenities, rate, agent, gallery, cta, meta } = skin;
 
 // Frame counts come from the files actually on disk, not a hand-typed number —
 // a count/disk mismatch makes the scrubber request 404s and the hero appears frozen.
@@ -97,27 +97,31 @@ const frames = {
     ))}
   </section>
 
-  <!-- THE SUITES — asymmetric editorial spread -->
-  <section class="suites" id="suites">
-    <div class="suites__copy" data-reveal>
-      <p class="kicker">{suites.kicker}</p>
-      <h2 class="section-title">{suites.title}</h2>
-      <p class="section-body">{suites.body}</p>
-      <a class="suites__link" href={suites.linkHref}>{suites.linkLabel} →</a>
-    </div>
-    <div class="suites__spread">
-      <figure class="suites__fig suites__fig--large" data-reveal>
-        <div class="media suites__media" style={`aspect-ratio: ${suites.images[0].ratio}`}>
-          <img data-media data-parallax="0.12" src={suites.images[0].src} alt={suites.images[0].alt} loading="lazy" />
-        </div>
-        <figcaption class="suites__cap">{suites.images[0].caption}</figcaption>
-      </figure>
-      <figure class="suites__fig suites__fig--small" data-reveal>
-        <div class="media suites__media" style={`aspect-ratio: ${suites.images[1].ratio}`}>
-          <img data-media data-parallax="0.18" src={suites.images[1].src} alt={suites.images[1].alt} loading="lazy" />
-        </div>
-        <figcaption class="suites__cap">{suites.images[1].caption}</figcaption>
-      </figure>
+  <!-- THE ROOMS — pinned horizontal carousel (lasala d-carousel-rooms), cards from suitesPage -->
+  <section class="rooms" id="suites" data-hscroll>
+    <div class="rooms__pin">
+      <div class="rooms__head" data-reveal>
+        <p class="kicker">{rooms.kicker}</p>
+        <h2 class="section-title">{rooms.title}</h2>
+        <p class="section-body">{rooms.body}</p>
+        <a class="rooms__link" href={rooms.linkHref}>{rooms.linkLabel} →</a>
+      </div>
+      <div class="rooms__track" data-hscroll-track>
+        {suitesPage.suites.map((s, i) => (
+          <a class="rooms__card" href={`/suites#${s.id}`}>
+            <div class="media rooms__media">
+              <img data-media src={s.hero.src} alt={s.hero.alt} loading="lazy" />
+              <span class="media__label" aria-hidden="true">{s.name}</span>
+            </div>
+            <div class="rooms__meta">
+              <span class="rooms__no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="rooms__name">{s.name}</span>
+              <span class="rooms__facts">{s.facts.area} · {s.facts.sleeps} · {s.rate}</span>
+            </div>
+            <p class="rooms__line">{s.line}</p>
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -196,6 +200,26 @@ const frames = {
     </ul>
   </section>
 
+  <!-- THE SETTING — location beat (lasala d-location): full-bleed aerial + small-caps meta -->
+  <section class="setting" id="setting">
+    <div class="setting__media">
+      <img data-media data-parallax="0.08" src={location.img} alt={location.imgAlt} loading="lazy" />
+      <div class="setting__scrim" aria-hidden="true"></div>
+    </div>
+    <div class="setting__copy" data-reveal>
+      <p class="kicker">{location.kicker}</p>
+      <h2 class="setting__title">{location.title}</h2>
+      <dl class="setting__meta">
+        {location.items.map((it) => (
+          <div class="setting__item">
+            <dt>{it.label}</dt>
+            <dd>{it.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
   <!-- THE RATE + REQUEST — one closing statement (rate folded into the enquiry) -->
   <section class="inquiry" id="enquire">
     <p class="kicker" data-reveal>{rate.kicker}</p>
@@ -247,20 +271,25 @@ const frames = {
 
   <script src="../scripts/journey.js"></script>
   <script>
-    // WATER — scroll-driven horizontal panel (property-level composition; engine stays fork-free).
-    // The pin is CSS sticky; this only maps section progress -> track translateX.
+    // Scroll-driven horizontal panels (ROOMS + WATER) — property-level; engine stays fork-free.
+    // The pin is CSS sticky; this only maps each section's progress -> track translateX.
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const section = document.querySelector('[data-hscroll]');
-    const track = document.querySelector('[data-hscroll-track]');
-    if (section && track && !reduced) {
+    const panels = [...document.querySelectorAll('[data-hscroll]')].map((section) => ({
+      section,
+      track: section.querySelector('[data-hscroll-track]'),
+    })).filter((p) => p.track);
+    if (panels.length && !reduced) {
       let ticking = false;
       const update = () => {
         ticking = false;
-        const r = section.getBoundingClientRect();
-        const total = section.offsetHeight - innerHeight;
-        const p = total <= 0 ? 1 : Math.max(0, Math.min(1, -r.top / total));
-        const max = track.scrollWidth - track.parentElement.clientWidth;
-        track.style.transform = `translate3d(${-p * Math.max(0, max)}px, 0, 0)`;
+        for (const { section, track } of panels) {
+          const r = section.getBoundingClientRect();
+          if (r.bottom < 0 || r.top > innerHeight) continue;
+          const total = section.offsetHeight - innerHeight;
+          const p = total <= 0 ? 1 : Math.max(0, Math.min(1, -r.top / total));
+          const max = track.scrollWidth - track.parentElement.clientWidth;
+          track.style.transform = `translate3d(${-p * Math.max(0, max)}px, 0, 0)`;
+        }
       };
       addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
       addEventListener('resize', update);

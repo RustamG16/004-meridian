@@ -61,3 +61,17 @@ light, one sky). Attach K0/an approved still as style reference. Drop into
    interior glow behind. Matches the existing `presidential.jpg` interior.
 5. **`presidential-living.jpg`** — Presidential Suite detail. Separate living room: linear
    fireplace, deep sofas, lake glass, evening. Same materials as `presidential.jpg`.
+
+## OPTIONAL — 2026-07-16 (2K re-rolls of 1376px stills)
+
+All media/ stills were rebuilt from the largest available sources (2752px originals where they
+exist, 1920px delogo'd clip frames for the video-derived ones). These remain capped at 1376×768
+(no larger source; AI upscale blocked — 2.5 Higgsfield credits left on free plan). If you re-roll
+any of them at 2K/2752px with the same composition, drop them in assets-in/ and they slot in:
+
+- `Circular_master_suite_lakeside_view_202607160248` (suites/circular — Circle Suite hero on /suites)
+- `Presidential_suite_with_lake_view_202607160248` (suites/presidential — Presidential hero)
+- `Tea_garden_inside_glass_sphere_202607160307` (sphere full-bleed — shown near full-screen, most visible)
+- `Alpine_resort_wellness_spa_interior_202607160240` (water/spa)
+- `Alpine_resort_terrace_infinity_pool_202607160248` (water/terrace-pool)
+- `K1_mid` (gallery/water-gardens)

@@ -154,25 +154,27 @@ export const skin = {
     ],
   },
 
-  suites: {
+  // Home ROOMS section (lasala d-carousel-rooms / hutstuf featured-huts pattern) —
+  // cards derive from suitesPage.suites (single source of truth), this block is the frame.
+  rooms: {
     kicker: 'THE SUITES',
-    title: 'A bed beneath a circle of sky.',
-    body: 'Glass on three sides, mountains on all of them. Forty-two suites — each one held above the water.',
+    title: 'Three ways to sleep on the lake.',
+    body: 'Forty-two suites, three characters. Every one holds the water in view; the difference is what the room does with the sky.',
     linkLabel: 'All suites',
     linkHref: '/suites',
-    images: [
-      {
-        src: '/media/suites/presidential.jpg',
-        alt: 'Presidential suite with lake view',
-        caption: 'Presidential Suite · Lake view',
-        ratio: '4 / 3',
-      },
-      {
-        src: '/media/suites/circular.jpg',
-        alt: 'Circular master suite lakeside',
-        caption: 'Master Suite · Circle skylight',
-        ratio: '3 / 4',
-      },
+  },
+
+  // Location/setting beat (lasala d-location / hutstuf featured-locations) — full-bleed aerial + meta.
+  location: {
+    kicker: 'THE SETTING',
+    title: 'An hour from anywhere. A minute from the water.',
+    img: '/media/gallery/sky.jpg',
+    imgAlt: 'The Meridian resort on the alpine lake at dusk',
+    items: [
+      { label: 'Altitude', value: '1,020 m' },
+      { label: 'Shoreline', value: '480 m, private' },
+      { label: 'Nearest town', value: '12 min by boat' },
+      { label: 'Transfer', value: '90 min from the airport' },
     ],
   },
 
