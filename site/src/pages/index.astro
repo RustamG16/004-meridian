@@ -4,7 +4,7 @@ import { skin } from '../content/skin';
 import { readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const { hud, journey, facts, suites, sphere, water, amenities, price, agent, gallery, cta, meta } = skin;
+const { hud, journey, facts, suites, sphere, water, amenities, rate, agent, gallery, cta, meta } = skin;
 
 // Frame counts come from the files actually on disk, not a hand-typed number —
 // a count/disk mismatch makes the scrubber request 404s and the hero appears frozen.
@@ -76,18 +76,23 @@ const frames = {
     </div>
   </section>
 
-  <!-- RESIDENCE FACTS STRIP — counters animate up on scroll -->
-  <section class="facts" aria-label="Residence facts">
-    {facts.map((f) => (
-      <div class="fact" data-reveal>
+  <!-- THE NUMBERS — one cinematic statement: oversized Fraunces numerals as index rows -->
+  <section class="numbers" aria-label="The resort in numbers">
+    <p class="kicker numbers__kicker" data-reveal>{facts.kicker}</p>
+    {facts.items.map((f, i) => (
+      <div class="numbers__row" data-reveal>
+        <span class="numbers__index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
         <span
-          class="fact__value"
+          class="numbers__value"
           data-count={f.value}
           data-format={f.format}
           data-suffix={f.suffix}
           data-decimals={f.decimals}
         >0</span>
-        <span class="fact__label">{f.label}</span>
+        <span class="numbers__meta">
+          <span class="numbers__label">{f.label}</span>
+          <span class="numbers__line">{f.line}</span>
+        </span>
       </div>
     ))}
   </section>
@@ -149,49 +154,54 @@ const frames = {
     </div>
   </section>
 
-  <!-- THE WATER — wellness triptych -->
-  <section class="water" id="water">
-    <div class="water__head" data-reveal>
-      <p class="kicker">{water.kicker}</p>
-      <h2 class="section-title">{water.title}</h2>
-      <p class="section-body">{water.body}</p>
-    </div>
-    <div class="water__triptych">
-      {water.images.map((img, i) => (
-        <figure class="water__fig" data-reveal style={`transition-delay: ${0.08 + i * 0.1}s`}>
-          <div class="media water__media">
-            <img data-media src={img.src} alt={img.alt} loading="lazy" />
-          </div>
-          <figcaption class="water__cap">{img.caption}</figcaption>
-        </figure>
-      ))}
+  <!-- THE WATER — scroll-driven horizontal panel (sticky pin, real movement, no editing grammar) -->
+  <section class="water" id="water" data-hscroll>
+    <div class="water__pin">
+      <div class="water__head" data-reveal>
+        <p class="kicker">{water.kicker}</p>
+        <h2 class="section-title">{water.title}</h2>
+        <p class="section-body">{water.body}</p>
+      </div>
+      <div class="water__track" data-hscroll-track>
+        {water.images.map((img) => (
+          <figure class="water__panel">
+            <div class="media water__media">
+              <img data-media src={img.src} alt={img.alt} loading="lazy" />
+              <span class="media__label" aria-hidden="true">{img.caption}</span>
+            </div>
+            <figcaption class="water__cap">{img.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
     </div>
   </section>
 
-  <!-- AMENITIES — reveal animations -->
+  <!-- AMENITIES — typographic index: numbered display rows, hover media preview -->
   <section class="amenities" id="amenities">
     <p class="kicker" data-reveal>{amenities.kicker}</p>
     <h2 class="section-title" data-reveal>{amenities.title}</h2>
-    <ul class="amenities__grid">
-      {amenities.items.map((item) => (
-        <li class="amenities__item" data-reveal>{item}</li>
+    <ul class="am-index" data-am-index>
+      {amenities.items.map((item, i) => (
+        <li class="am-index__item" data-reveal>
+          <span class="am-index__no" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <span class="am-index__label">{item.label}</span>
+          {'img' in item && item.img && (
+            <span class="am-index__preview" aria-hidden="true">
+              <img src={item.img} alt="" loading="lazy" />
+            </span>
+          )}
+        </li>
       ))}
     </ul>
   </section>
 
-  <!-- PRICE — one statement -->
-  <section class="price" id="price">
-    <p class="kicker" data-reveal>{price.kicker}</p>
-    <p class="price__amount" data-reveal>{price.amount}</p>
-    <p class="price__line" data-reveal>{price.line}</p>
-  </section>
-
-  <!-- CTA — request a private showing + agent card -->
+  <!-- THE RATE + REQUEST — one closing statement (rate folded into the enquiry) -->
   <section class="inquiry" id="enquire">
-    <p class="kicker" data-reveal>{cta.kicker}</p>
+    <p class="kicker" data-reveal>{rate.kicker}</p>
+    <p class="inquiry__rate" data-reveal>{rate.amount}</p>
+    <p class="inquiry__rate-line" data-reveal>{rate.line}</p>
     <h2 class="inquiry__title" data-reveal>{cta.title}</h2>
     <p class="section-body inquiry__sub" data-reveal>{cta.sub}</p>
-    <p class="inquiry__price" data-reveal>{cta.priceLine}</p>
     <div class="inquiry__grid" data-reveal>
       <form class="inquiry__form" data-inquiry novalidate>
         <div class="inquiry__row">
@@ -231,4 +241,25 @@ const frames = {
   </section>
 
   <script src="../scripts/journey.js"></script>
+  <script>
+    // WATER — scroll-driven horizontal panel (property-level composition; engine stays fork-free).
+    // The pin is CSS sticky; this only maps section progress -> track translateX.
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const section = document.querySelector('[data-hscroll]');
+    const track = document.querySelector('[data-hscroll-track]');
+    if (section && track && !reduced) {
+      let ticking = false;
+      const update = () => {
+        ticking = false;
+        const r = section.getBoundingClientRect();
+        const total = section.offsetHeight - innerHeight;
+        const p = total <= 0 ? 1 : Math.max(0, Math.min(1, -r.top / total));
+        const max = track.scrollWidth - track.parentElement.clientWidth;
+        track.style.transform = `translate3d(${-p * Math.max(0, max)}px, 0, 0)`;
+      };
+      addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+      addEventListener('resize', update);
+      update();
+    }
+  </script>
 </Base>

@@ -144,12 +144,15 @@ export const skin = {
     ],
   },
 
-  facts: [
-    { value: 42, label: 'Suites & Residences' },
-    { value: 25, label: 'Infinity Pool', suffix: ' M' },
-    { value: 1400, label: 'Spa & Sauna', format: 'en', suffix: ' M²' },
-    { value: 4, label: 'Restaurants & Bars' },
-  ],
+  facts: {
+    kicker: 'THE MERIDIAN IN NUMBERS',
+    items: [
+      { value: 42, label: 'Suites & Residences', line: 'each one held above the water' },
+      { value: 25, label: 'Metres of Infinity Pool', suffix: '', line: 'it forgets where the lake begins' },
+      { value: 1400, label: 'Square Metres of Spa', format: 'en', line: 'warm water, kept dark' },
+      { value: 4, label: 'Restaurants & Bars', line: 'the doors are already open' },
+    ],
+  },
 
   suites: {
     kicker: 'THE SUITES',
@@ -204,23 +207,25 @@ export const skin = {
   amenities: {
     kicker: 'AMENITIES',
     title: 'Everything the lake allows.',
+    // img is optional — a preview only exists where a TRUE image exists (law 3:
+    // never attach a wrong-but-available image; missing ones stay type-only).
     items: [
-      'Heated rooftop infinity pool',
-      'Lakeside restaurant',
-      'Panorama spa — sauna & steam',
-      'Private beach & boathouse',
-      'Natural swimming pond',
-      'Suites with circle skylights',
-      'Lounge with linear fireplace',
-      'Water gardens',
-      'Mountain & lake guides',
-      'Wine cellar dinners',
-      'Boat transfers',
-      '24-hour concierge',
+      { label: 'Heated rooftop infinity pool', img: '/media/water/terrace-pool.jpg' },
+      { label: 'Lakeside restaurant', img: '/media/spaces/restaurant.jpg' },
+      { label: 'Panorama spa — sauna & steam', img: '/media/water/spa.jpg' },
+      { label: 'Private beach & boathouse' },
+      { label: 'Natural swimming pond' },
+      { label: 'Suites with circle skylights', img: '/media/spaces/suite.jpg' },
+      { label: 'Lounge with linear fireplace', img: '/media/gallery/lounge.jpg' },
+      { label: 'Water gardens', img: '/media/gallery/water-gardens.jpg' },
+      { label: 'Mountain & lake guides' },
+      { label: 'Wine cellar dinners' },
+      { label: 'Boat transfers' },
+      { label: '24-hour concierge' },
     ],
   },
 
-  price: {
+  rate: {
     kicker: 'THE RATE',
     amount: 'From €1,850',
     line: 'One suite, one evening above the water.',
